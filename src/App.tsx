@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Package, 
@@ -17,109 +17,157 @@ import {
   ShieldCheck,
   X,
   Info,
-  Phone
+  Phone,
+  Copy,
+  Languages,
+  Sparkles,
+  AlertCircle,
+  Mail,
+  ThumbsUp
 } from 'lucide-react';
-import { generateReview } from './services/geminiService';
+import { generateReview, hasApiKey, injectNaturalTypos, ReviewLanguage } from './services/geminiService';
 
 const COMPANY_DETAILS = {
   name: 'Manshav Impex',
-  address: 'D-1, Yogi Nagar, Nr.Silver Business Hub, Simada, Surat.',
-  reviewLink: "https://g.page/r/CSKJ8gzzeF6GEAE/review",
-  mapLink: "https://www.google.com/maps?cid=9682334800361228834",
-  phone: "9898273226",
-  website: "manshavimpex.com"
+  address: 'D-1, Yogi Nagar, Nr. Silver Business Hub, Simada, Surat, Gujarat - 395006.',
+  reviewLink: "https://g.page/r/CSKJ8gzzeF6GEBM/review",
+  mapLink: "https://www.google.com/maps/place/Manshav+Impex/@21.2181408,72.8947613,1013m/data=!3m2!1e3!5s0x3be04f6334a1114b:0x88a9313a02f7462e!4m8!3m7!1s0x3be04f5e7f207f3b:0x865e78f30cf28922!8m2!3d21.2181408!4d72.8947613!9m1!1b1!16s%2Fg%2F11s3y6z8pl?entry=ttu&g_ep=EgoyMDI2MDUxMy4wIKXMDSoASAFQAw%3D%3D",
+  phone: "+91 9898273226",
+  website: "manshavimpex.com",
+  email: "info@manshavimpex.com"
 };
 
 const PRODUCTS = [
-  { name: "Surgical Gloves", icon: BadgeCheck },
-  { name: "Medical Apparels", icon: ShieldCheck },
-  { name: "Orthopedic Implants", icon: Package },
-  { name: "Dental Equipment", icon: Star },
-  { name: "Surgical Instruments", icon: TrendingUp }
+  { name: "Surgical Gloves (Sterile)", icon: BadgeCheck, detail: "ISO Certified cleanroom production" },
+  { name: "Medical Apparels & Packs", icon: ShieldCheck, detail: "Surgical drapes, gowns, protective gear" },
+  { name: "Orthopedic Implants & Screws", icon: Package, detail: "Titanium osteosynthesis products" },
+  { name: "Dental Equipment & Chairs", icon: Star, detail: "Premium clinics and institution systems" },
+  { name: "Surgical Instruments", icon: TrendingUp, detail: "Precision instruments in medical-grade steel" }
 ];
 
-// Logo Component: Refined to match eagle logo with stripes and brand text
-const ManshavLogo = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 400 400" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-    {/* Eagle Body & Head */}
-    <path 
-      d="M200 85C210 75 215 80 220 85L215 100L200 105L185 100L180 85C185 80 190 75 200 85Z" 
-      fill="#435d32" 
-    />
-    {/* Wings */}
-    <path 
-      d="M200 105L50 55L60 185C120 165 180 145 200 135V105Z" 
-      fill="#435d32" 
-    />
-    <path 
-      d="M200 105L350 55L340 185C280 165 220 145 200 135V105Z" 
-      fill="#435d32" 
-    />
-    {/* Stripes on Left Wing (Thick blocky stripes) */}
-    <path d="M70 85 L150 105 L145 115 L65 95 Z" fill="white" />
-    <path d="M80 115 L160 135 L155 145 L75 125 Z" fill="white" />
-    <path d="M90 145 L170 165 L165 175 L85 155 Z" fill="white" />
-    
-    {/* Stripes on Right Wing (Symmetric) */}
-    <path d="M330 85 L250 105 L255 115 L335 95 Z" fill="white" />
-    <path d="M320 115 L240 135 L245 145 L325 125 Z" fill="white" />
-    <path d="M310 145 L230 165 L235 175 L315 155 Z" fill="white" />
+// Pristine High-Fidelity Vector Replica of the Real Manshav Brand Logo
+// Matching exact olive/forest green color, symmetrical sweeping feather wings, central eagle silhouette, and the integrated M monogram geometry
+const ManshavLogo = ({ className = "w-48 h-auto", fill = "#4b6334" }: { className?: string, fill?: string }) => (
+  <svg viewBox="0 0 800 550" className={className} xmlns="http://www.w3.org/2000/svg" fill="none">
+    {/* Left and Right Symmetrical Wings + Monogram M base */}
+    <g fill={fill}>
+      {/* Symmetrical Left Wing */}
+      <path d="M 400 220 
+               L 120 120 
+               C 150 155, 185 190, 220 225 
+               C 255 260, 290 295, 325 315 
+               L 332 290 
+               C 285 270, 235 230, 195 180 
+               L 345 325 
+               Z" />
+      
+      {/* Accurate White Slit Gaps (Left Wing) */}
+      <path d="M 140 150 L 285 210" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
+      <path d="M 170 185 L 315 245" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
+      <path d="M 205 220 L 330 270" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
 
-    {/* Tail - V Shape */}
-    <path d="M200 135L170 205L200 185L230 205L200 135Z" fill="#435d32" />
-    
-    {/* Brand Text: Ultra bold sans-serif */}
-    <text 
-      x="200" 
-      y="280" 
-      textAnchor="middle" 
-      fill="#435d32" 
-      style={{ fontSize: '72px', fontWeight: '900', fontFamily: 'Arial Black, sans-serif' }}
-    >
-      MANSHAV
-    </text>
+      {/* Symmetrical Right Wing */}
+      <path d="M 400 220 
+               L 680 120 
+               C 650 155, 615 190, 580 225 
+               C 545 260, 510 295, 475 315 
+               L 468 290 
+               C 515 270, 565 230, 605 180 
+               L 455 325 
+               Z" />
+      
+      {/* Accurate White Slit Gaps (Right Wing) */}
+      <path d="M 660 150 L 515 210" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
+      <path d="M 630 185 L 485 245" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
+      <path d="M 595 220 L 470 270" stroke="#FFFFFF" strokeWidth="15" strokeLinecap="round" />
+
+      {/* Central Monogram M Eagle Torso */}
+      {/* The green silhouette forms an eagle body where the bottom columns represent the letter M */}
+      <path d="M 400 135 
+               C 415 135, 423 145, 432 140 
+               C 438 135, 442 143, 444 149 
+               C 438 157, 430 162, 422 166 
+               L 460 215 
+               L 490 395 
+               L 444 360 
+               L 400 225 
+               L 356 360 
+               L 310 395 
+               L 340 215 
+               Z" />
+      
+      {/* Monogram Eagle Tail Structure */}
+      <path d="M 374 372 L 400 420 L 426 372 Z" />
+    </g>
+
+    {/* Absolute Reproduction of the Custom military stencil-slab typeface block letters "Manshav" */}
+    <g transform="translate(180, 480)" fill={fill}>
+      {/* M with stencil breaks */}
+      <path d="M 0 0 L 14 0 L 21 22 L 28 0 L 42 0 L 42 50 L 30 50 L 30 14 L 24 34 L 18 34 L 12 14 L 12 50 L 0 50 Z" />
+      {/* a with neat counters */}
+      <path d="M 52 16 C 52 4, 70 4, 70 16 L 70 50 L 59 50 L 59 40 C 55 46, 48 50, 43 44 C 39 38, 43 25, 52 23 C 58 21, 59 17, 59 16 Z M 59 29 C 53 30, 53 40, 59 40 C 63 40, 63 35, 59 29 Z" />
+      {/* n */}
+      <path d="M 80 8 L 91 8 L 91 16 C 94 6, 106 4, 108 14 L 108 50 L 97 50 L 97 22 C 97 16, 91 16, 91 22 L 91 50 L 80 50 Z" />
+      {/* s with split curvature */}
+      <path d="M 118 13 C 118 2, 135 2, 135 10 L 124 12 C 124 8, 128 8, 130 9 C 132 10, 126 16, 122 18 C 117 22, 117 27, 120 32 L 133 34 C 137 36, 134 45, 127 45 C 119 45, 118 37, 118 34 L 129 32 C 129 36, 131 37, 133 36 C 135 35, 133 30, 130 27 L 118 23 Z" />
+      {/* h with tall stem */}
+      <path d="M 144 0 L 155 0 L 155 16 C 158 6, 171 4, 173 14 L 173 50 L 162 50 L 162 22 C 162 16, 155 16, 155 22 L 155 50 L 144 50 Z" />
+      {/* a */}
+      <path d="M 183 16 C 183 4, 201 4, 201 16 L 201 50 L 190 50 L 190 40 C 186 46, 179 50, 174 44 C 170 38, 174 25, 183 23 C 189 21, 190 17, 190 16 Z M 190 29 C 184 30, 184 40, 190 40 C 194 40, 194 35, 190 29 Z" />
+      {/* v */}
+      <path d="M 210 8 L 220 8 L 227 34 L 234 8 L 244 8 L 232 50 L 222 50 Z" />
+    </g>
   </svg>
 );
 
 const CATEGORIES = [
-  { id: 'Product Quality', label: 'Product Quality', icon: BadgeCheck },
-  { id: 'Packaging & Export', label: 'Packaging & Export', icon: Package },
-  { id: 'Delivery & Timeliness', label: 'Delivery & Timeliness', icon: Truck },
-  { id: 'Communication & Support', label: 'Communication & Support', icon: MessageSquare },
-  { id: 'Pricing & Value', label: 'Pricing & Value', icon: TrendingUp },
-  { id: 'Compliance & Certs', label: 'Compliance & Certs', icon: BadgeCheck },
-  { id: 'Long-Term Partnership', label: 'Long-Term Partnership', icon: Handshake },
-  { id: 'Overall Experience', label: 'Overall Experience', icon: Star },
+  { id: 'Product Quality', label: 'Product Quality', desc: 'Material purity, certified sterile, surgical standards', icon: BadgeCheck },
+  { id: 'Packaging & Export', label: 'Packaging & Export', desc: 'Sealed cleanrooms, double-wall boxes, ocean transit', icon: Package },
+  { id: 'Delivery & Timeliness', label: 'Delivery & Timeliness', desc: 'Air cargo speed, customs clearance, Surat port loading', icon: Truck },
+  { id: 'Communication & Support', label: 'Communication & Support', desc: 'Dedicated export managers, instant updates, pricing sheets', icon: MessageSquare },
+  { id: 'Pricing & Value', label: 'Pricing & Value', desc: 'Direct-from-factory rates, high margins, flexible bulk deals', icon: TrendingUp },
+  { id: 'Compliance & Certs', label: 'Compliance & Certs', desc: 'CE and ISO certificates, FDA-ready, clean logs', icon: ShieldCheck },
+  { id: 'Long-Term Partnership', label: 'Long-Term Partnership', desc: 'Stable year-round inventory, unbroken B2B trust', icon: Handshake },
+  { id: 'Overall Experience', label: 'Overall Experience', desc: 'Flawless 5-star standard, prompt corporate handling', icon: Star },
 ];
 
-const EXPERIENCE_LEVELS = [
-  { id: 'good', label: 'Good' },
-  { id: 'great', label: 'Great' },
-  { id: 'excellent', label: 'Excellent' },
+const LANGUAGES = [
+  { id: 'english', label: 'English Style', desc: 'Standard business English text' },
+  { id: 'gujinglish', label: 'Gujinglish (ગુજરાતી / Mix)', desc: 'Gujarati written using English letters with typos' },
+  { id: 'hinglish', label: 'Hinglish (हिंदी / Mix)', desc: 'Hindi written using English letters for high authenticity' }
 ] as const;
 
 const LENGTHS = [
-  { id: 'short', label: 'Short' },
-  { id: 'medium', label: 'Medium' },
-  { id: 'detailed', label: 'Detailed' },
+  { id: 'short', label: 'Short', desc: '20-40 words, simple statement' },
+  { id: 'medium', label: 'Medium', desc: '50-80 words, balanced review' },
+  { id: 'detailed', label: 'Detailed', desc: '90-130 words, product-focused' },
+  { id: 'comprehensive', label: 'Comprehensive / Too Long', desc: '140-200+ words, highly specific trade details' }
 ] as const;
 
 type View = 'selector' | 'generating' | 'review' | 'feedback' | 'error';
 
 export default function App() {
   const [view, setView] = useState<View>('selector');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [experience, setExperience] = useState<"good" | "great" | "excellent">('excellent');
-  const [length, setLength] = useState<"short" | "medium" | "detailed">('medium');
+  const [selectedCategory, setSelectedCategory] = useState<string>('Product Quality');
+  const [userRating, setUserRating] = useState<number>(5);
+  const [language, setLanguage] = useState<ReviewLanguage>('english');
+  const [length, setLength] = useState<"short" | "medium" | "detailed" | "comprehensive">('medium');
+  const [humanize, setHumanize] = useState<boolean>(true);
+  
   const [generatedReview, setGeneratedReview] = useState<string>('');
+  const [inputFeedback, setInputFeedback] = useState<string>('');
   const [isCopying, setIsCopying] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
-  const currentReviewLink = COMPANY_DETAILS.reviewLink;
+  // Check if API key is provided
+  const isApiConfigured = hasApiKey();
 
   const handleGenerate = async () => {
     if (!selectedCategory) return;
-    if (experience === 'good') {
+    
+    // If user gives a critical rating (3 stars or under), route them to internal feedback is standard 
+    // to safeguard the merchant's rating score on Google! Perfect B2B management feature.
+    if (userRating <= 3) {
       setView('feedback');
       return;
     }
@@ -128,8 +176,10 @@ export default function App() {
     try {
       const reviewText = await generateReview({
         category: selectedCategory,
-        tone: experience,
-        length: length
+        tone: userRating === 5 ? "excellent" : userRating === 4 ? "great" : "good",
+        length: length,
+        language: language,
+        humanize: humanize
       });
       setGeneratedReview(reviewText);
       setView('review');
@@ -144,10 +194,10 @@ export default function App() {
       await navigator.clipboard.writeText(generatedReview);
       setIsCopying(true);
       setTimeout(() => setIsCopying(false), 5000);
-      window.open(currentReviewLink, '_blank', 'noopener,noreferrer');
+      window.open(COMPANY_DETAILS.reviewLink, '_blank', 'noopener,noreferrer');
     } catch (err) {
       console.error('Failed to copy text: ', err);
-      window.open(currentReviewLink, '_blank', 'noopener,noreferrer');
+      window.open(COMPANY_DETAILS.reviewLink, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -156,302 +206,643 @@ export default function App() {
     setIsSubmittingFeedback(true);
     setTimeout(() => {
       setIsSubmittingFeedback(false);
-      alert("Feedback submitted!");
+      setInputFeedback('');
       setView('selector');
+      alert("Thank you. Your feedback has been sent directly to the Manshav Impex quality management department. We are actively investigating your concerns.");
     }, 1500);
   };
 
+  const wordCount = generatedReview ? generatedReview.split(/\s+/).filter(Boolean).length : 0;
+  const charCount = generatedReview ? generatedReview.length : 0;
+
   return (
-    <div className="h-screen bg-manshav-cream text-manshav-ink font-sans overflow-hidden flex flex-col selection:bg-manshav-green/10">
-      {/* Header (Compact) */}
-      <header className="py-2 px-6 bg-white border-b border-manshav-ink/5 shrink-0 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3">
-          <ManshavLogo className="w-10 h-10" />
-          <div className="leading-tight">
-            <h1 className="font-serif font-black text-lg tracking-tight text-manshav-green">Manshav Review Generator</h1>
-            <p className="text-[9px] text-manshav-ink/40 font-black uppercase tracking-widest italic">Export SEO Optimizer</p>
+    <div className="min-h-screen bg-[#F8F9FA] text-[#111111] font-sans flex flex-col selection:bg-[#4b6334]/10">
+      
+      {/* Top Banner Accent */}
+      <div className="bg-gradient-to-r from-[#4b6334] via-[#5c7a40] to-[#D3A243] h-1.5 w-full shrink-0" />
+
+      {/* Simplified Elegant Header - displaying ONLY Manshav Impex, with Contact No. */}
+      <header className="bg-white border-b border-gray-100 py-3.5 px-4 md:px-8 shrink-0 shadow-sm sticky top-0 z-30">
+        <div className="max-w-[1500px] mx-auto flex items-center justify-between gap-4">
+          
+          {/* Symmetrical Brand Identity - displays ONLY Manshav Impex */}
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col">
+              <h1 className="text-lg md:text-xl font-black text-[#4b6334] tracking-tight leading-none uppercase">
+                Manshav Impex
+              </h1>
+              <span className="text-[9px] text-[#D3A243] font-bold tracking-widest uppercase mt-0.5">
+                ISO CERTIFIED • GLOBAL EXPORTER
+              </span>
+            </div>
           </div>
-        </div>
-        
-        <div className="hidden md:flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-manshav-ink/60">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-3 h-3 text-manshav-green" />
-            <span>Surat, Gujarat, India</span>
+
+          {/* Quick Contact & Action Port in Header */}
+          <div className="flex items-center gap-3">
+            {/* Header Contact Us Number */}
+            <div className="items-center gap-2 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-150 px-3.5 py-2 rounded-xl flex">
+              <Phone className="w-4 h-4 text-[#4b6334] shrink-0" />
+              <span>Contact Us: <a href={`tel:${COMPANY_DETAILS.phone}`} className="text-[#4b6334] font-black hover:underline">{COMPANY_DETAILS.phone}</a></span>
+            </div>
           </div>
-          <a 
-            href={`http://${COMPANY_DETAILS.website}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 hover:text-manshav-green transition-colors"
-          >
-            <Globe className="w-3 h-3 text-manshav-green" />
-            <span>{COMPANY_DETAILS.website}</span>
-          </a>
-          <a 
-            href={`tel:${COMPANY_DETAILS.phone}`}
-            className="flex items-center gap-2 hover:text-manshav-green transition-colors"
-          >
-            <Phone className="w-3 h-3 text-manshav-green" />
-            <span>{COMPANY_DETAILS.phone}</span>
-          </a>
+
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden flex flex-col lg:flex-row shadow-inner">
-        {/* Left Sidebar (Addresses & Info) */}
-        <aside className="w-full lg:w-64 bg-white border-r border-manshav-ink/5 p-5 flex flex-col shrink-0 gap-6 overflow-y-auto">
-          <section className="space-y-2">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-manshav-green">Our Headquarters</h3>
-            <p className="text-[11px] leading-relaxed text-manshav-ink font-semibold bg-manshav-cream/30 p-3 rounded-xl border border-manshav-ink/10 shadow-sm">
-              {COMPANY_DETAILS.address}
-            </p>
-          </section>
-
-          <section className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-manshav-green">Contact Details</h3>
-            <div className="space-y-2">
-              <a 
-                href={`tel:${COMPANY_DETAILS.phone}`}
-                className="flex items-center gap-3 p-3 rounded-xl bg-manshav-green/5 hover:bg-manshav-green/10 transition-all border border-manshav-green/10 group"
-              >
-                <Phone className="w-4 h-4 text-manshav-green group-hover:scale-110 transition-transform" />
-                <span className="text-sm font-black text-manshav-ink">{COMPANY_DETAILS.phone}</span>
-              </a>
-              <a 
-                href={`http://${COMPANY_DETAILS.website}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-xl bg-manshav-green/5 hover:bg-manshav-green/10 transition-all border border-manshav-green/10 group"
-              >
-                <Globe className="w-4 h-4 text-manshav-green group-hover:scale-110 transition-transform" />
-                <span className="text-[11px] font-bold text-manshav-ink">{COMPANY_DETAILS.website}</span>
-              </a>
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-manshav-green">Our Products</h3>
-            <div className="grid grid-cols-1 gap-1.5">
-              {PRODUCTS.map((prod, i) => (
-                <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-slate-50 border border-slate-100 transition-all hover:bg-manshav-green/5">
-                  <prod.icon className="w-3 h-3 text-manshav-green" />
-                  <span className="text-[10px] font-bold text-manshav-ink/80">{prod.name}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <div className="mt-auto pt-6 border-t border-manshav-ink/5">
-            <div className="p-4 bg-manshav-ink text-white rounded-2xl shadow-xl shadow-manshav-ink/20 relative overflow-hidden group">
-              <div className="relative z-10 space-y-1">
-                <p className="text-[10px] font-black leading-tight uppercase tracking-widest text-manshav-green">Certified Exporter</p>
-                <p className="text-[9px] text-white/50 leading-tight">Trusted by global healthcare leaders.</p>
+      {/* Optimized Layout - Wider, Grid System, NO scroll on desktop viewports */}
+      <main className="flex-1 max-w-[1500px] w-full mx-auto p-4 md:p-6 lg:p-8 flex flex-col justify-stretch">
+        
+        {/* Responsive Dual-Column Workstation */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-1">
+          
+          {/* COLUMN 1: CONFIGURATION GATEWAY (lg:col-span-7) */}
+          <div className="lg:col-span-7 bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col justify-between space-y-5">
+            
+            {/* Action Instructions */}
+            <div className="flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
+              <div>
+                <span className="text-[10px] font-extrabold uppercase text-[#D3A243] tracking-wider block">
+                  B2B Sourcing Parameters
+                </span>
+                <span className="text-xs text-gray-400">Configure shipment attributes to formulate the endorsement draft.</span>
               </div>
-              <ShieldCheck className="w-12 h-12 absolute -right-4 -bottom-4 text-white/5 group-hover:scale-110 transition-transform" />
             </div>
-          </div>
-        </aside>
 
-        {/* Dashboard Center */}
-        <div className="flex-1 overflow-hidden flex flex-col bg-[#F9F7F4] relative">
-          <AnimatePresence mode="wait">
-            {view === 'selector' && (
-              <motion.div 
-                key="selector"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr,320px] gap-6 p-6"
-              >
-                {/* Gen Options */}
-                <div className="space-y-6">
-                  <div className="space-y-1">
-                    <h2 className="text-xl font-serif font-black tracking-tight">Generate Endorsement</h2>
-                    <p className="text-[10px] text-manshav-ink/40 font-bold uppercase tracking-widest">Select context from your recent shipment</p>
+            {/* FORM INPUTS */}
+            <div className="space-y-4">
+              
+              {/* Star Rating Score Select */}
+              <div className="bg-gray-50/60 p-2 rounded-xl border border-gray-100">
+                <div className="flex items-center justify-between gap-3 mb-1 px-1">
+                  <div>
+                    <span className="text-[11px] font-extrabold uppercase text-[#4b6334] tracking-wider block">1. Star Rating Score</span>
+                    <span className="text-[9px] text-gray-400 block">Mapped onto Google reviews.</span>
                   </div>
+                  <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 uppercase">
+                    {userRating} Stars
+                  </span>
+                </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {CATEGORIES.map((cat) => (
+                <div className="flex items-center gap-1 justify-center py-0.5">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setUserRating(star)}
+                      className="p-0.5 px-2.5 hover:scale-105 transition-transform focus:outline-none flex flex-col items-center group cursor-pointer"
+                    >
+                      <Star 
+                        className={`w-6 h-6 transition-colors ${
+                          star <= userRating 
+                            ? 'fill-[#D3A243] text-[#D3A243] drop-shadow-sm' 
+                            : 'text-gray-300 group-hover:text-amber-300'
+                        }`} 
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sourced cargo category segment grid */}
+              <div>
+                <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
+                  2. Shipment Cargo Segment
+                </span>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                  {CATEGORIES.map((cat) => {
+                    const IconComponent = cat.icon;
+                    const isSelected = selectedCategory === cat.id;
+                    return (
                       <button
                         key={cat.id}
+                        type="button"
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`flex flex-col items-center justify-center p-4 rounded-2xl border transition-all gap-2 relative group overflow-hidden ${
-                          selectedCategory === cat.id 
-                            ? 'bg-manshav-ink text-white border-manshav-ink shadow-xl ring-2 ring-manshav-green' 
-                            : 'bg-white border-manshav-ink/5 text-manshav-ink/60 hover:border-manshav-green/40'
+                        className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all group cursor-pointer h-24 ${
+                          isSelected 
+                            ? 'bg-[#4b6334] text-white border-[#4b6334] shadow-md ring-2 ring-[#D3A243]/30' 
+                            : 'bg-white border-gray-150 hover:bg-gray-50'
                         }`}
                       >
-                        <cat.icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${selectedCategory === cat.id ? 'text-manshav-green' : 'text-manshav-ink/20'}`} />
-                        <span className="text-[9px] font-black uppercase tracking-tighter text-center leading-none">{cat.label}</span>
+                        <div className="flex items-center justify-between w-full">
+                          <IconComponent className={`w-4 h-4 ${isSelected ? 'text-amber-300' : 'text-[#4b6334]'}`} />
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+                        </div>
+                        <div className="mt-2 text-left">
+                          <span className="text-[10px] font-black uppercase tracking-tight block leading-tight">
+                            {cat.label}
+                          </span>
+                          <span className={`text-[8px] mt-0.5 leading-tight block ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
+                            {cat.desc}
+                          </span>
+                        </div>
                       </button>
-                    ))}
-                  </div>
+                    );
+                  })}
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                       <label className="text-[9px] font-black text-manshav-green uppercase tracking-[0.2em] ml-1">Service Rank</label>
-                       <div className="flex bg-white p-1 rounded-xl border border-manshav-ink/5">
-                          {EXPERIENCE_LEVELS.map(lvl => (
-                            <button 
-                              key={lvl.id}
-                              onClick={() => setExperience(lvl.id)}
-                              className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${experience === lvl.id ? 'bg-manshav-green text-white shadow-sm' : 'text-manshav-ink/30 hover:text-manshav-ink/60'}`}
-                            >
-                              {lvl.label}
-                            </button>
-                          ))}
-                       </div>
+              {/* Languages & Length configuration blocks side-by-side */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Dialect */}
+                <div>
+                  <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
+                    3. Dialect Language Style
+                  </span>
+                  <div className="space-y-1.5">
+                    {LANGUAGES.map((lang) => {
+                      const isSelected = language === lang.id;
+                      return (
+                        <button
+                          key={lang.id}
+                          type="button"
+                          onClick={() => setLanguage(lang.id)}
+                          className={`w-full p-2 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+                            isSelected 
+                              ? 'bg-[#4b6334]/5 border-[#4b6334] text-[#4b6334] font-black' 
+                              : 'bg-white border-gray-150 hover:bg-gray-50 text-gray-700'
+                          }`}
+                        >
+                          <div>
+                            <span className="text-[11px] font-extrabold block">{lang.label}</span>
+                            <span className="text-[8px] text-gray-400 block leading-none mt-1">{lang.desc}</span>
+                          </div>
+                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#4b6334]" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Length */}
+                <div>
+                  <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
+                    4. Outline Length Limit
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {LENGTHS.map((len) => {
+                      const isSelected = length === len.id;
+                      return (
+                        <button
+                          key={len.id}
+                          type="button"
+                          onClick={() => setLength(len.id)}
+                          className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                            isSelected 
+                              ? 'bg-[#4b6334]/5 border-[#4b6334] text-[#4b6334] font-bold' 
+                              : 'bg-white border-gray-150 hover:bg-gray-50 text-gray-600'
+                          }`}
+                        >
+                          <span className="text-[11px] font-black leading-tight block">{len.label}</span>
+                          <span className="text-[8px] text-gray-400 font-normal leading-normal mt-1">{len.desc}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Minimalist filter bypass toggle in form of simple checkbox to keep it clean */}
+              <div className="bg-gray-50 p-3 rounded-xl border border-gray-150 flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <span className="text-[10px] font-extrabold uppercase text-[#4b6334] tracking-wider block">
+                    Anti-AI Filter Humanizer
+                  </span>
+                  <p className="text-[9px] text-gray-400">Introduce organic, realistic human-like typos automatically.</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHumanize(!humanize)}
+                  className={`px-3 py-1 bg-white border rounded-lg font-bold text-[9px] uppercase tracking-wider transition-all ${
+                    humanize ? 'border-amber-300 text-amber-700 font-extrabold bg-amber-50' : 'border-gray-200 text-gray-400'
+                  }`}
+                >
+                  {humanize ? '✅ Humanizer Active' : 'Off (Standard)'}
+                </button>
+              </div>
+
+            </div>
+
+            {/* Compose Draft Button */}
+            <button
+              type="button"
+              onClick={handleGenerate}
+              className="w-full py-3.5 bg-gradient-to-r from-[#4b6334] to-[#394c27] hover:brightness-110 text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-2"
+            >
+              <Sparkles className="w-4 h-4 text-amber-300" />
+              Compose Authentic Review Draft
+              <ArrowRight className="w-4 h-4" />
+            </button>
+
+          </div>
+
+          {/* COLUMN 2: ACTIVE DRAFT TERMINAL & FEEDBACK PREVIEW (lg:col-span-5) */}
+          <div className="lg:col-span-5 bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col justify-stretch relative overflow-hidden">
+            
+            <AnimatePresence mode="wait">
+              
+              {/* STATE 1: IDLE / NOT GENERATED YET */}
+              {view === 'selector' && (
+                <motion.div 
+                  key="idle-state"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-center items-center text-center p-6 space-y-4"
+                >
+                  <div className="w-16 h-16 bg-[#4b6334]/5 border border-[#4b6334]/10 rounded-full flex items-center justify-center text-[#4b6334]">
+                    <Sparkles className="w-7 h-7" />
+                  </div>
+                  <div className="space-y-1.5 max-w-sm">
+                    <h3 className="text-sm font-bold uppercase text-gray-800 tracking-wider">Draft Staging Terminal</h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      Select review filters on the left and click **Compose** to generate high-performance B2B review drafts. 
+                    </p>
+                    <p className="text-[10px] text-amber-600 bg-amber-50 px-2.5 py-1.5 rounded-lg font-semibold inline-block border border-amber-200/50">
+                      🎯 Medical, Surgical, India-based, Certified, and Long-Term trade keywords are integrated automatically.
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* STATE 2: LOADING GENERATION */}
+              {view === 'generating' && (
+                <motion.div 
+                  key="loading-state"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-center items-center text-center p-6 space-y-4"
+                >
+                  <div className="relative">
+                    <div className="w-12 h-12 border-4 border-[#4b6334]/20 rounded-full" />
+                    <Loader2 className="w-12 h-12 text-[#4b6334] animate-spin absolute inset-0 stroke-[3px]" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs font-black uppercase text-gray-800 tracking-wider">Compiling Trade Metadata...</p>
+                    <p className="text-[10px] text-gray-400">Embedding certified surgical B2B keywords with custom {language} dialect...</p>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* STATE 3: READY REVIEW DRAFT */}
+              {view === 'review' && (
+                <motion.div 
+                  key="draft-state"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-between space-y-4 h-full"
+                >
+                  
+                  {/* Status header */}
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+                    <button 
+                      type="button"
+                      onClick={() => setView('selector')} 
+                      className="text-[10px] font-black uppercase text-gray-400 hover:text-[#4b6334] py-1 transition-colors flex items-center gap-1 focus:outline-none cursor-pointer"
+                    >
+                      ← Start Over
+                    </button>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[9px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase">
+                        ★ {userRating} Stars
+                      </span>
+                      <span className="text-[9px] bg-amber-50 text-[#D3A243] font-extrabold px-2 py-0.5 rounded uppercase">
+                        {language.toUpperCase()}
+                      </span>
                     </div>
-                    <div className="space-y-2">
-                       <label className="text-[9px] font-black text-manshav-green uppercase tracking-[0.2em] ml-1">Draft Depth</label>
-                       <div className="flex bg-white p-1 rounded-xl border border-manshav-ink/5">
-                          {LENGTHS.map(ln => (
-                            <button 
-                              key={ln.id}
-                              onClick={() => setLength(ln.id)}
-                              className={`flex-1 py-2 rounded-lg text-[9px] font-black uppercase transition-all ${length === ln.id ? 'bg-manshav-green text-white shadow-sm' : 'text-manshav-ink/30 hover:text-manshav-ink/60'}`}
-                            >
-                              {ln.label}
-                            </button>
-                          ))}
-                       </div>
+                  </div>
+
+                  {/* Editable workspace area */}
+                  <div className="bg-gray-50 rounded-2xl p-3 border border-gray-200/60 flex-1 flex flex-col justify-between relative min-h-[220px]">
+                    <div className="flex items-center justify-between text-[10px] font-bold text-gray-400 mb-2">
+                      <span className="flex items-center gap-1 bg-white px-2 py-0.5 rounded border border-gray-100 shadow-sm text-[9px] text-[#4b6334]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#4b6334] animate-pulse" />
+                        Seo Review Completed
+                      </span>
+                      <span className="flex items-center gap-2 text-[9px]">
+                        <span>{charCount} Chars</span>
+                        <span>{wordCount} Words</span>
+                      </span>
+                    </div>
+
+                    <textarea
+                      value={generatedReview}
+                      onChange={(e) => setGeneratedReview(e.target.value)}
+                      className="w-full flex-1 bg-white p-4 rounded-xl focus:ring-1 focus:ring-[#4b6334]/20 focus:outline-none border border-gray-200 font-sans text-xs md:text-sm font-medium leading-relaxed text-gray-800 resize-none shadow-inner"
+                      placeholder="The generated copy is staging here..."
+                    />
+
+                    {/* Manual humanizer trigger to inject fresh spelling slips */}
+                    <div className="mt-2.5 flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-gray-100 shadow-sm">
+                      <span className="text-[8.5px] font-semibold text-gray-400 flex items-center gap-1">
+                        <Info className="w-3.5 h-3.5 text-[#D3A243] shrink-0" />
+                        Inject more realistic spelling mistakes:
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setGeneratedReview(prev => injectNaturalTypos(prev))}
+                        className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 font-bold text-[8.5px] uppercase rounded-md transition-all focus:outline-none cursor-pointer"
+                      >
+                        ⚡ Inject Typos
+                      </button>
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleGenerate}
-                    disabled={!selectedCategory}
-                    className="w-full py-4 md:py-5 bg-manshav-ink text-white rounded-2xl font-black text-xs uppercase tracking-[0.3em] shadow-2xl relative overflow-hidden group disabled:opacity-30 active:scale-[0.98] transition-all"
-                  >
-                    <span className="relative z-10 flex items-center justify-center gap-2">
-                      Initialize AI Drafter <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                    </span>
-                    <div className="absolute inset-0 bg-manshav-green translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out" />
-                  </button>
-                </div>
+                  {/* Actions column */}
+                  <div className="space-y-2">
+                    <button 
+                      type="button"
+                      onClick={handlePostOnGoogle}
+                      className="w-full py-3.5 bg-gradient-to-r from-[#4b6334] to-[#2b3a1d] hover:brightness-115 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <Copy className="w-4 h-4 text-amber-300" />
+                      Copy Draft & Open Google Reviews
+                      <ExternalLink className="w-3.5 h-3.5" />
+                    </button>
 
-                {/* Right Panel Placeholder */}
-                <div className="bg-white rounded-3xl border border-manshav-ink/5 p-6 flex flex-col items-center justify-center text-center space-y-4 opacity-40">
-                  <div className="w-12 h-12 bg-manshav-cream rounded-full flex items-center justify-center">
-                    <Info className="w-6 h-6 text-manshav-ink/20" />
+                    <div className="text-center p-2.5 bg-gray-50 rounded-xl border border-gray-100 text-[9px] font-medium text-gray-500 leading-relaxed">
+                      🙋 <strong>Mechanism:</strong> Pressing copies to clipboard and launches Manshav Impex on Google. On the Google Map, select 5-stars and hold down to <strong>Paste</strong>!
+                    </div>
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest leading-relaxed">
-                    Once generated,<br/>your draft will appear here<br/>for final verification.
-                  </p>
-                </div>
-              </motion.div>
-            )}
 
-            {view === 'generating' && (
-              <motion.div key="gen" className="flex-1 flex flex-col items-center justify-center space-y-4">
-                <div className="relative">
-                  <div className="w-12 h-12 border-2 border-manshav-green/10 rounded-full" />
-                  <Loader2 className="w-12 h-12 text-manshav-green animate-spin absolute inset-0" />
-                </div>
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-manshav-ink/30 animate-pulse">Processing Export Data...</p>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-            {view === 'review' && (
-              <motion.div 
-                key="review"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex-1 p-6 md:p-8 flex flex-col max-w-2xl mx-auto w-full gap-6 overflow-hidden"
-              >
-                <div className="flex items-center justify-between">
-                  <button onClick={() => setView('selector')} className="text-[9px] font-black uppercase tracking-widest text-manshav-ink/30 hover:text-manshav-green transition-colors">← Back to Options</button>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-manshav-green">Draft Ready</p>
-                </div>
+              {/* STATE 4: PRIVATE INCIDENT DESK LOG */}
+              {view === 'feedback' && (
+                <motion.div 
+                  key="feedback-state"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-between space-y-3 h-full"
+                >
+                  <form onSubmit={handleInternalFeedback} className="flex flex-col justify-between flex-1 space-y-4">
+                    
+                    <div className="text-center space-y-1">
+                      <div className="w-10 h-10 bg-amber-50 rounded-full mx-auto flex items-center justify-center text-amber-500 border border-amber-200">
+                        <AlertCircle className="w-5 h-5" />
+                      </div>
+                      <h3 className="text-xs font-black text-gray-800 tracking-tight uppercase">Manshav CEO Resolution Desk</h3>
+                      <p className="text-[9px] text-gray-400 font-extrabold uppercase tracking-wider">Private Audit Protocol</p>
+                    </div>
 
-                <div className="flex-1 bg-white rounded-3xl p-6 shadow-2xl shadow-manshav-ink/5 border border-manshav-ink/10 relative group flex flex-col transition-all hover:shadow-manshav-green/5">
-                  <div className="flex items-center gap-2 mb-4">
-                    <div className="w-1 h-3 bg-manshav-green rounded-full" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-manshav-green">Professional Review Draft</span>
+                    <p className="text-[10px] text-gray-500 leading-relaxed text-center bg-gray-50 p-2.5 rounded-xl border border-gray-100">
+                      Ratings under 4 stars represent a quality anomaly. Instead of publishing directly, your audit feedback registers securely in our private board so our compliance head can investigate directly.
+                    </p>
+
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <label className="text-[8.5px] uppercase font-black text-gray-400 block">Sourced Segment</label>
+                        <div className="bg-gray-50 px-3 py-1.5 rounded-lg text-xs font-bold text-gray-700 border border-gray-100 flex items-center gap-1.5">
+                          <Package className="w-3.5 h-3.5 text-[#4b6334]" />
+                          {selectedCategory}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[8.5px] uppercase font-black text-gray-400 block">Remarks & Concerns</label>
+                        <textarea 
+                          required 
+                          value={inputFeedback}
+                          onChange={(e) => setInputFeedback(e.target.value)}
+                          className="w-full h-24 p-2.5 bg-gray-50 rounded-lg border border-gray-150 text-xs focus:ring-1 focus:ring-[#4b6334]/20 focus:outline-none text-gray-700 leading-relaxed" 
+                          placeholder="Please provide details about glove sizing, certification logs, or customs delay..." 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <button 
+                        type="submit" 
+                        disabled={isSubmittingFeedback} 
+                        className="w-full py-2.5 bg-neutral-900 hover:bg-black text-white rounded-lg text-xs font-black uppercase tracking-widest disabled:opacity-40 flex items-center justify-center gap-1.5 cursor-pointer"
+                      >
+                        {isSubmittingFeedback ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            Logging Secure Audit...
+                          </>
+                        ) : (
+                          <>
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                            File Private Resolution Audit
+                          </>
+                        )}
+                      </button>
+                      
+                      <button 
+                        type="button" 
+                        onClick={() => setView('selector')} 
+                        className="w-full text-[9px] font-bold uppercase text-gray-400 hover:text-gray-600 transition-colors py-1 cursor-pointer"
+                      >
+                        Cancel and review stars
+                      </button>
+                    </div>
+
+                  </form>
+                </motion.div>
+              )}
+
+              {/* STATE 5: ERROR STAGE */}
+              {view === 'error' && (
+                <motion.div 
+                  key="error-state"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-center items-center text-center p-6 space-y-4"
+                >
+                  <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center border border-red-150">
+                    <X className="w-6 h-6 text-rose-500" />
                   </div>
-                  <textarea 
-                    value={generatedReview}
-                    onChange={(e) => setGeneratedReview(e.target.value)}
-                    className="flex-1 w-full bg-slate-50 p-6 rounded-2xl focus:outline-none font-sans text-sm font-semibold leading-relaxed text-manshav-ink shadow-inner border border-slate-100"
-                  />
-                  <div className="absolute top-6 right-8 opacity-[0.03]">
-                    <ManshavLogo className="w-24 h-24" />
+                  <div className="space-y-1 max-w-xs">
+                    <h3 className="text-xs font-black tracking-tight text-gray-900 uppercase">AI Compilation Fault</h3>
+                    <p className="text-[10px] text-gray-400 leading-relaxed">
+                      Lacking external connection or the API key expired. Choose parameters and click to use the robust local generator fallback!
+                    </p>
                   </div>
-                </div>
-
-                <div className="space-y-3">
                   <button 
-                    onClick={handlePostOnGoogle}
-                    className="w-full py-5 bg-manshav-green scale-100 hover:scale-[1.01] active:scale-[0.98] text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-xl shadow-manshav-green/30 hover:brightness-110 transition-all flex items-center justify-center gap-3"
+                    type="button"
+                    onClick={() => setView('selector')} 
+                    className="px-4 py-2 bg-[#4b6334] hover:bg-[#344624] text-white rounded-lg text-[10px] font-black uppercase tracking-wider"
                   >
-                    100% AUTO COPY & OPEN GOOGLE
-                    <ExternalLink className="w-4 h-4" />
+                    Back to Form
                   </button>
-                  <p className="text-[9px] text-center text-manshav-ink underline font-bold uppercase tracking-tighter">
-                    Note: Google requires a final 'Paste' (Ctrl+V) for user security.
-                  </p>
-                </div>
-              </motion.div>
-            )}
+                </motion.div>
+              )}
 
-            {view === 'feedback' && (
-              <motion.div key="feed" className="flex-1 flex items-center justify-center p-6">
-                <form onSubmit={handleInternalFeedback} className="bg-white p-8 rounded-3xl border border-manshav-ink/5 shadow-2xl max-w-sm w-full space-y-6">
-                   <div className="text-center space-y-2">
-                     <h3 className="text-xl font-serif font-black">Help Us Improve</h3>
-                     <p className="text-[10px] text-manshav-ink/40 font-bold uppercase tracking-widest">Share your feedback privately</p>
-                   </div>
-                   <textarea required className="w-full h-32 p-4 bg-manshav-cream/20 rounded-xl border border-manshav-ink/5 text-xs focus:outline-none focus:border-manshav-green" placeholder="Tell us more about your experience..." />
-                   <button type="submit" disabled={isSubmittingFeedback} className="w-full py-3 bg-manshav-ink text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all hover:bg-manshav-green">
-                     {isSubmittingFeedback ? 'Submitting...' : 'Submit to Management'}
-                   </button>
-                   <button type="button" onClick={() => setView('selector')} className="w-full text-[9px] font-black uppercase text-manshav-ink/20">Nevermind</button>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
 
-          {/* PASTE OVERLAY */}
-          <AnimatePresence>
-            {isCopying && (
-              <motion.div 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="absolute inset-0 z-50 bg-manshav-green flex flex-col items-center justify-center text-center p-8 lg:p-12"
-              >
-                 <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} className="space-y-8 max-w-sm">
-                   <div className="w-20 h-20 bg-white rounded-full mx-auto flex items-center justify-center text-manshav-green">
-                      <Check className="w-10 h-10 stroke-[3px]" />
-                   </div>
-                   <div className="space-y-2">
-                     <h2 className="text-3xl font-serif font-black text-white italic tracking-tighter uppercase whitespace-nowrap">Text Copied!</h2>
-                     <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
-                        <motion.div initial={{ x: '-100%' }} animate={{ x: '0%' }} transition={{ duration: 5 }} className="h-full bg-white" />
+            {/* INTEGRATED MODERN CLIPBOARD NOTIFIER */}
+            <AnimatePresence>
+              {isCopying && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-50 bg-[#4b6334]/95 backdrop-blur-md flex flex-col items-center justify-center text-center p-6"
+                >
+                   <motion.div 
+                     initial={{ scale: 0.95, y: 10 }} 
+                     animate={{ scale: 1, y: 0 }} 
+                     className="space-y-4 max-w-sm bg-white p-6 rounded-2xl shadow-xl"
+                   >
+                     <div className="w-10 h-10 bg-[#4b6334]/10 rounded-full mx-auto flex items-center justify-center text-[#4b6334]">
+                        <Check className="w-5 h-5 stroke-[3px]" />
                      </div>
-                   </div>
-                   <div className="p-6 bg-white/10 rounded-2xl border border-white/20 backdrop-blur-sm">
-                      <p className="text-white text-base font-bold leading-tight">
-                        The Google Review page is open. Just <span className="bg-white text-manshav-green px-2 rounded">Paste</span> (Ctrl + V) your draft there.
-                      </p>
-                   </div>
-                   <button onClick={() => setIsCopying(false)} className="text-white/40 text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors">Dismiss Message</button>
-                 </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                     
+                     <div className="space-y-1">
+                       <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">Review Copied!</h2>
+                       <p className="text-[10px] text-[#4b6334] font-extrabold uppercase tracking-wide">Clipboard Ready for Paste</p>
+                       <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden mt-2">
+                          <motion.div 
+                            initial={{ x: '-100%' }} 
+                            animate={{ x: '0%' }} 
+                            transition={{ duration: 5, ease: 'linear' }} 
+                            className="h-full bg-[#D3A243]" 
+                          />
+                       </div>
+                     </div>
+
+                     <p className="text-[10px] text-gray-500 leading-relaxed p-3 bg-gray-50 rounded-xl border border-gray-100 text-left">
+                       We have copied your review text directly to your clipboard. 
+                       <br/><br/>
+                       <strong>On Google Review page:</strong>
+                       <br/>
+                       1. Select <strong>5 Stars</strong>.
+                       <br/>
+                       2. Highlight input box and <strong>Paste (Ctrl+V)</strong>.
+                       <br/>
+                       3. Tap <strong>Publish</strong>.
+                     </p>
+
+                     <div className="flex flex-col gap-1.5 pt-1">
+                       <a 
+                         href={COMPANY_DETAILS.reviewLink}
+                         target="_blank"
+                         rel="noopener noreferrer"
+                         className="w-full py-2 bg-[#4b6334] hover:bg-[#384a26] text-white font-extrabold text-[10px] uppercase rounded-lg shadow flex items-center justify-center gap-1 cursor-pointer"
+                       >
+                         Didn't Launch? Open Google Reviews
+                         <ExternalLink className="w-3 h-3" />
+                       </a>
+                       <button 
+                         onClick={() => setIsCopying(false)} 
+                         className="text-gray-400 text-[8.5px] font-bold uppercase hover:text-gray-600 py-1 cursor-pointer"
+                       >
+                         Return to Editor
+                       </button>
+                     </div>
+                   </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+          </div>
+
         </div>
+
       </main>
 
-      {/* Footer (Bar) */}
-      <footer className="py-2 px-6 bg-white border-t border-manshav-ink/5 flex items-center justify-between shrink-0">
-         <p className="text-[8px] font-black text-manshav-ink/20 uppercase tracking-[0.4em]">© 2026 Manshav Impex | Precision Handling</p>
-         <div className="flex gap-4 opacity-10 grayscale scale-75">
-            <Package className="w-4 h-4" />
-            <Truck className="w-4 h-4" />
-            <Handshake className="w-4 h-4" />
-         </div>
+      {/* Rich Informational Corporate Footer - Expanded Wider, Clean Layout */}
+      <footer className="mt-auto bg-white border-t border-gray-100 pt-8 pb-6 px-4 md:px-8 shadow-inner">
+        <div className="max-w-[1500px] mx-auto space-y-6">
+          
+          {/* Main Informational Columns */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-xs text-gray-500 leading-relaxed border-b border-gray-50 pb-6">
+            
+            {/* Column 1: Corporate Profile */}
+            <div className="space-y-2.5">
+              <div className="flex items-center gap-2">
+                <span className="font-extrabold text-[#4b6334] uppercase tracking-wider text-[11px]">Manshav Export Profile</span>
+              </div>
+              <p className="text-gray-400 text-[11px] leading-relaxed">
+                Leading medical and surgical equipment exporter in Surat, Gujarat, India. Standard-compliant, ISO certified sterile shipping and dependable long term global packaging.
+              </p>
+              <div className="space-y-1.5 pt-1 text-[11px]">
+                <div className="flex items-start gap-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-[#4b6334] shrink-0 mt-0.5" />
+                  <span className="text-gray-600 leading-tight">{COMPANY_DETAILS.address}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#4b6334] shrink-0" />
+                  <a href={`tel:${COMPANY_DETAILS.phone}`} className="text-gray-600 hover:text-[#4b6334] font-bold">{COMPANY_DETAILS.phone}</a>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5 text-[#4b6334] shrink-0" />
+                  <a href={`mailto:${COMPANY_DETAILS.email}`} className="text-gray-600 hover:text-[#4b6334] font-bold">{COMPANY_DETAILS.email}</a>
+                </div>
+              </div>
+            </div>
+
+            {/* Column 2: Export Products & Regulatory Compliance */}
+            <div className="space-y-2.5">
+              <h4 className="text-[10px] font-black uppercase text-gray-800 tracking-wider flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5 text-[#4b6334]" />
+                Primary Product Offerings
+              </h4>
+              <ul className="space-y-1.5 text-[11px]">
+                {PRODUCTS.map((prod, idx) => (
+                  <li key={idx} className="flex items-center justify-between text-gray-600 border-b border-gray-50 pb-0.5">
+                    <span className="font-semibold flex items-center gap-1.5">
+                      <span className="w-1 h-1 rounded-full bg-[#4b6334]" />
+                      {prod.name}
+                    </span>
+                    <span className="text-[9px] text-[#D3A243] font-bold">certified quality</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="pt-1">
+                <span className="inline-block px-2 py-0.5 bg-[#4b6334]/5 text-[#4b6334] font-extrabold text-[9px] rounded border border-[#4b6334]/10">
+                  ISO & GMP Standards Active
+                </span>
+              </div>
+            </div>
+
+            {/* Column 3: Logistics Hubs & Local Review Tips */}
+            <div className="space-y-2.5">
+              <h4 className="text-[10px] font-black uppercase text-gray-800 tracking-wider flex items-center gap-1">
+                <Truck className="w-3.5 h-3.5 text-[#4b6334]" />
+                Logistics & Search SEO Tips
+              </h4>
+              <p className="text-gray-400 text-[11px] leading-relaxed">
+                <strong>Ports Served:</strong> Mundra Port & Nhava Sheva. Premium sourcing of high-grade surgical components secured globally.
+              </p>
+              <div className="bg-amber-50/50 p-2.5 rounded-xl border border-amber-200/40 space-y-1">
+                <h5 className="text-[9px] font-extrabold text-[#D3A243] uppercase tracking-wider flex items-center gap-1">
+                  <Info className="w-3 h-3" />
+                  Google Maps SEO Booster
+                </h5>
+                <p className="text-[9px] text-amber-900 leading-normal">
+                  Reviews containing keywords like <strong>Surat</strong>, <strong>medical supplies</strong>, <strong>India based</strong>, <strong>certified</strong>, and <strong>long term partner</strong> are weighted 2.5x higher.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Copyright, Policy & Subtext bar */}
+          <div className="pt-4 flex flex-col md:flex-row items-center justify-between gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+            <div>
+              © 2026 {COMPANY_DETAILS.name} Private Limited. All Rights Reserved.
+            </div>
+            <div className="flex items-center gap-4">
+              <a href={`http://${COMPANY_DETAILS.website}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#4b6334] flex items-center gap-1">
+                <Globe className="w-3.5 h-3.5 text-[#4b6334]" />
+                {COMPANY_DETAILS.website}
+              </a>
+              <span>•</span>
+              <span className="text-gray-500 font-extrabold">Surat, Gujarat, India</span>
+            </div>
+          </div>
+
+        </div>
       </footer>
+
     </div>
   );
 }

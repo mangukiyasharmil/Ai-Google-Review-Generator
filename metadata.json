@@ -2,5 +2,5 @@
   "name": "Manshav Impex Review Generator",
   "description": "A professional B2B review generator for Manshav Impex - Medical Products Exporter.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
