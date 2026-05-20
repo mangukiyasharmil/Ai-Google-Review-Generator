@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Package, 
@@ -144,7 +144,7 @@ const LENGTHS = [
   { id: 'comprehensive', label: 'Comprehensive / Too Long', desc: '140-200+ words, highly specific trade details' }
 ] as const;
 
-type View = 'selector' | 'generating' | 'review' | 'feedback' | 'error';
+type View = 'selector' | 'generating' | 'review' | 'feedback' | 'error' | 'success-feedback';
 
 export default function App() {
   const [view, setView] = useState<View>('selector');
@@ -152,12 +152,17 @@ export default function App() {
   const [userRating, setUserRating] = useState<number>(5);
   const [language, setLanguage] = useState<ReviewLanguage>('english');
   const [length, setLength] = useState<"short" | "medium" | "detailed" | "comprehensive">('medium');
-  const [humanize, setHumanize] = useState<boolean>(true);
+  const [humanize, setHumanize] = useState<boolean>(false);
   
   const [generatedReview, setGeneratedReview] = useState<string>('');
   const [inputFeedback, setInputFeedback] = useState<string>('');
   const [isCopying, setIsCopying] = useState(false);
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+
+  // Auto scroll to top of window when view shifts, ensuring perfect view for mobile customers
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [view]);
 
   // Check if API key is provided
   const isApiConfigured = hasApiKey();
@@ -207,8 +212,7 @@ export default function App() {
     setTimeout(() => {
       setIsSubmittingFeedback(false);
       setInputFeedback('');
-      setView('selector');
-      alert("Thank you. Your feedback has been sent directly to the Manshav Impex quality management department. We are actively investigating your concerns.");
+      setView('success-feedback');
     }, 1500);
   };
 
@@ -240,9 +244,10 @@ export default function App() {
           {/* Quick Contact & Action Port in Header */}
           <div className="flex items-center gap-3">
             {/* Header Contact Us Number */}
-            <div className="items-center gap-2 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-150 px-3.5 py-2 rounded-xl flex">
-              <Phone className="w-4 h-4 text-[#4b6334] shrink-0" />
-              <span>Contact Us: <a href={`tel:${COMPANY_DETAILS.phone}`} className="text-[#4b6334] font-black hover:underline">{COMPANY_DETAILS.phone}</a></span>
+            <div className="items-center gap-1.5 text-xs font-bold text-gray-700 bg-gray-50 border border-gray-150 px-2.5 py-1.5 sm:px-3.5 sm:py-2 rounded-xl flex">
+              <Phone className="w-3.5 h-3.5 text-[#4b6334] shrink-0" />
+              <span className="hidden sm:inline text-gray-400 font-semibold">Contact:</span>
+              <a href={`tel:${COMPANY_DETAILS.phone}`} className="text-[#4b6334] font-black hover:underline">{COMPANY_DETAILS.phone}</a>
             </div>
           </div>
 
@@ -256,17 +261,9 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch flex-1">
           
           {/* COLUMN 1: CONFIGURATION GATEWAY (lg:col-span-7) */}
-          <div className="lg:col-span-7 bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col justify-between space-y-5">
+          <div className={`lg:col-span-7 bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-5 md:p-6 flex flex-col justify-between space-y-5 ${view !== 'selector' ? 'hidden lg:flex' : 'flex'}`}>
             
-            {/* Action Instructions */}
-            <div className="flex items-center justify-between gap-4 border-b border-gray-100 pb-3">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase text-[#D3A243] tracking-wider block">
-                  B2B Sourcing Parameters
-                </span>
-                <span className="text-xs text-gray-400">Configure shipment attributes to formulate the endorsement draft.</span>
-              </div>
-            </div>
+
 
             {/* FORM INPUTS */}
             <div className="space-y-4">
@@ -403,24 +400,7 @@ export default function App() {
 
               </div>
 
-              {/* Minimalist filter bypass toggle in form of simple checkbox to keep it clean */}
-              <div className="bg-gray-50 p-3 rounded-xl border border-gray-150 flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <span className="text-[10px] font-extrabold uppercase text-[#4b6334] tracking-wider block">
-                    Anti-AI Filter Humanizer
-                  </span>
-                  <p className="text-[9px] text-gray-400">Introduce organic, realistic human-like typos automatically.</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setHumanize(!humanize)}
-                  className={`px-3 py-1 bg-white border rounded-lg font-bold text-[9px] uppercase tracking-wider transition-all ${
-                    humanize ? 'border-amber-300 text-amber-700 font-extrabold bg-amber-50' : 'border-gray-200 text-gray-400'
-                  }`}
-                >
-                  {humanize ? '✅ Humanizer Active' : 'Off (Standard)'}
-                </button>
-              </div>
+
 
             </div>
 
@@ -438,7 +418,7 @@ export default function App() {
           </div>
 
           {/* COLUMN 2: ACTIVE DRAFT TERMINAL & FEEDBACK PREVIEW (lg:col-span-5) */}
-          <div className="lg:col-span-5 bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 flex flex-col justify-stretch relative overflow-hidden">
+          <div className={`lg:col-span-5 bg-white rounded-3xl border border-gray-100 shadow-sm p-4 sm:p-5 md:p-6 flex flex-col justify-stretch relative overflow-hidden ${view === 'selector' ? 'hidden lg:flex' : 'flex'}`}>
             
             <AnimatePresence mode="wait">
               
@@ -501,9 +481,9 @@ export default function App() {
                     <button 
                       type="button"
                       onClick={() => setView('selector')} 
-                      className="text-[10px] font-black uppercase text-gray-400 hover:text-[#4b6334] py-1 transition-colors flex items-center gap-1 focus:outline-none cursor-pointer"
+                      className="text-[9px] font-extrabold uppercase text-[#4b6334] bg-[#4b6334]/5 border border-[#4b6334]/15 px-2.5 py-1.5 rounded-lg hover:bg-[#4b6334]/10 transition-colors flex items-center gap-1 focus:outline-none cursor-pointer"
                     >
-                      ← Start Over
+                      ← Back & Configure
                     </button>
                     <div className="flex items-center gap-1.5">
                       <span className="text-[9px] bg-emerald-50 text-emerald-700 font-extrabold px-2 py-0.5 rounded uppercase">
@@ -531,41 +511,25 @@ export default function App() {
                     <textarea
                       value={generatedReview}
                       onChange={(e) => setGeneratedReview(e.target.value)}
-                      className="w-full flex-1 bg-white p-4 rounded-xl focus:ring-1 focus:ring-[#4b6334]/20 focus:outline-none border border-gray-200 font-sans text-xs md:text-sm font-medium leading-relaxed text-gray-800 resize-none shadow-inner"
+                      className="w-full flex-1 bg-white p-4 rounded-xl focus:ring-1 focus:ring-[#4b6334]/20 focus:outline-none border border-gray-200 font-sans text-xs md:text-sm font-medium leading-relaxed text-gray-800 resize-none shadow-inner animate-fade-in"
                       placeholder="The generated copy is staging here..."
                     />
-
-                    {/* Manual humanizer trigger to inject fresh spelling slips */}
-                    <div className="mt-2.5 flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-gray-100 shadow-sm">
-                      <span className="text-[8.5px] font-semibold text-gray-400 flex items-center gap-1">
-                        <Info className="w-3.5 h-3.5 text-[#D3A243] shrink-0" />
-                        Inject more realistic spelling mistakes:
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => setGeneratedReview(prev => injectNaturalTypos(prev))}
-                        className="px-2 py-1 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-700 font-bold text-[8.5px] uppercase rounded-md transition-all focus:outline-none cursor-pointer"
-                      >
-                        ⚡ Inject Typos
-                      </button>
-                    </div>
                   </div>
 
-                  {/* Actions column */}
-                  <div className="space-y-2">
+                  {/* Actions col with Copy Draft CTA */}
+                  <div className="space-y-3 pt-1">
+                    
+                    {/* Big Bold Primary CTA Button */}
                     <button 
                       type="button"
                       onClick={handlePostOnGoogle}
-                      className="w-full py-3.5 bg-gradient-to-r from-[#4b6334] to-[#2b3a1d] hover:brightness-115 text-white rounded-xl font-black text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-4 bg-gradient-to-r from-[#4b6334] to-[#2c3b1e] hover:brightness-110 active:scale-[0.99] text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Copy className="w-4 h-4 text-amber-300" />
-                      Copy Draft & Open Google Reviews
+                      Copy Review & Go to Google Maps
                       <ExternalLink className="w-3.5 h-3.5" />
                     </button>
 
-                    <div className="text-center p-2.5 bg-gray-50 rounded-xl border border-gray-100 text-[9px] font-medium text-gray-500 leading-relaxed">
-                      🙋 <strong>Mechanism:</strong> Pressing copies to clipboard and launches Manshav Impex on Google. On the Google Map, select 5-stars and hold down to <strong>Paste</strong>!
-                    </div>
                   </div>
 
                 </motion.div>
@@ -647,6 +611,40 @@ export default function App() {
                 </motion.div>
               )}
 
+              {/* STATE 4.5: SUCCESS FEEDBACK STAGE */}
+              {view === 'success-feedback' && (
+                <motion.div 
+                  key="success-feedback-state"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col justify-center items-center text-center p-6 space-y-5"
+                >
+                  <div className="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 border border-emerald-200 shadow-inner">
+                    <ShieldCheck className="w-7 h-7 stroke-[2.5]" />
+                  </div>
+                  <div className="space-y-2 max-w-sm">
+                    <h3 className="text-sm font-black text-gray-800 tracking-tight uppercase">Audit Lodged Successfully</h3>
+                    <p className="text-[9px] text-emerald-700 font-extrabold uppercase tracking-widest bg-emerald-50/80 px-2 py-0.5 rounded inline-block border border-emerald-150">
+                      Private Resolution Active
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed pt-1.5">
+                      Your feedback has been delivered securely to the Manshav Impex compliance & board of directors. A representative will review your trade logs immediately.
+                    </p>
+                  </div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setUserRating(5); 
+                      setView('selector');
+                    }}
+                    className="px-6 py-2.5 bg-neutral-900 hover:bg-black text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+                  >
+                    Back to Generator
+                  </button>
+                </motion.div>
+              )}
+
               {/* STATE 5: ERROR STAGE */}
               {view === 'error' && (
                 <motion.div 
@@ -689,14 +687,14 @@ export default function App() {
                    <motion.div 
                      initial={{ scale: 0.95, y: 10 }} 
                      animate={{ scale: 1, y: 0 }} 
-                     className="space-y-4 max-w-sm bg-white p-6 rounded-2xl shadow-xl"
+                     className="space-y-4 max-w-sm bg-white p-6 rounded-2xl shadow-xl border border-gray-100"
                    >
-                     <div className="w-10 h-10 bg-[#4b6334]/10 rounded-full mx-auto flex items-center justify-center text-[#4b6334]">
-                        <Check className="w-5 h-5 stroke-[3px]" />
+                     <div className="w-10 h-10 bg-amber-50 rounded-full mx-auto flex items-center justify-center text-[#D3A243] border border-amber-200">
+                        <Star className="w-5 h-5 fill-[#D3A243]" />
                      </div>
                      
                      <div className="space-y-1">
-                       <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">Review Copied!</h2>
+                       <h2 className="text-sm font-black text-gray-900 uppercase tracking-tight">Draft Copied Automatically!</h2>
                        <p className="text-[10px] text-[#4b6334] font-extrabold uppercase tracking-wide">Clipboard Ready for Paste</p>
                        <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden mt-2">
                           <motion.div 
@@ -708,33 +706,39 @@ export default function App() {
                        </div>
                      </div>
 
-                     <p className="text-[10px] text-gray-500 leading-relaxed p-3 bg-gray-50 rounded-xl border border-gray-100 text-left">
-                       We have copied your review text directly to your clipboard. 
-                       <br/><br/>
-                       <strong>On Google Review page:</strong>
-                       <br/>
-                       1. Select <strong>5 Stars</strong>.
-                       <br/>
-                       2. Highlight input box and <strong>Paste (Ctrl+V)</strong>.
-                       <br/>
-                       3. Tap <strong>Publish</strong>.
-                     </p>
+                     <div className="text-left bg-amber-50/50 p-3 rounded-xl border border-amber-100 text-[10px] text-gray-600 leading-relaxed space-y-2">
+                       <p className="font-semibold text-amber-900 flex items-center gap-1">
+                         <Info className="w-3.5 h-3.5 text-[#D3A243] shrink-0" />
+                         Google Security Policy Note:
+                       </p>
+                       <p>
+                         To protect user security, Google does not allow any external website to automatically insert text or choose stars on their page for you.
+                       </p>
+                       <p>
+                         <strong>It takes just 2 simple taps on Google:</strong>
+                         <br />
+                         1. Select <strong className="text-amber-600">5 Stars</strong>.
+                         <br />
+                         2. Long-press or right-click the text box and tap <strong className="text-amber-600">Paste</strong>.
+                       </p>
+                     </div>
 
                      <div className="flex flex-col gap-1.5 pt-1">
                        <a 
                          href={COMPANY_DETAILS.reviewLink}
                          target="_blank"
                          rel="noopener noreferrer"
-                         className="w-full py-2 bg-[#4b6334] hover:bg-[#384a26] text-white font-extrabold text-[10px] uppercase rounded-lg shadow flex items-center justify-center gap-1 cursor-pointer"
+                         className="w-full py-2.5 bg-[#4b6334] hover:bg-[#384a26] text-white font-extrabold text-[10px] uppercase rounded-lg shadow flex items-center justify-center gap-1 cursor-pointer"
                        >
-                         Didn't Launch? Open Google Reviews
+                         Open Google & Paste Now
                          <ExternalLink className="w-3 h-3" />
                        </a>
                        <button 
+                         type="button"
                          onClick={() => setIsCopying(false)} 
-                         className="text-gray-400 text-[8.5px] font-bold uppercase hover:text-gray-600 py-1 cursor-pointer"
+                         className="text-gray-400 text-[8.5px] font-bold uppercase hover:text-gray-600 py-1 cursor-pointer focus:outline-none"
                        >
-                         Return to Editor
+                         Back to Review Generator
                        </button>
                      </div>
                    </motion.div>
