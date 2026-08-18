@@ -47,7 +47,7 @@ export interface ReviewRequest {
   humanize: boolean;
 }
 
-// Typo Injector to make writing look authentic and bypass AI filters
+// Typo Injector to make writing look authentic, organic, and bypass AI filters
 export function injectNaturalTypos(text: string): string {
   const commonTypos: Record<string, string> = {
     "received": "recieved",
@@ -60,43 +60,79 @@ export function injectNaturalTypos(text: string): string {
     "products": "prodcuts",
     "equipment": "equitment",
     "surgical": "surgicle",
-    "impex": "impex",
     "communication": "comunication",
     "instruments": "insturments",
     "partnership": "partnerhip",
     "completely": "completly",
     "impeccable": "impecable",
     "extremely": "extremly",
-    "certified": "certfied"
+    "certified": "certfied",
+    "supplies": "suplies",
+    "hospital": "hospitel",
+    "guarantee": "gurantee",
+    "definitely": "definatly",
+    "service": "sevice",
+    "prompt": "promt",
+    "schedule": "scheduel",
+    "packaging": "packging",
+    "material": "materal",
+    "medical": "medicle",
+    "partner": "partnr",
+    "experience": "experiance",
+    "international": "internatinal",
+    "business": "bussiness",
+    "truly": "truely"
   };
 
   let words = text.split(" ");
-  return words.map(word => {
+  let typoCount = 0;
+
+  let newWords = words.map((word) => {
     const cleanWord = word.toLowerCase().replace(/[^a-z]/g, "");
-    if (commonTypos[cleanWord] && Math.random() < 0.45) {
-      // Keep punctuation or casing if possible
+    if (commonTypos[cleanWord] && typoCount < 2) {
+      typoCount++;
       const typo = commonTypos[cleanWord];
-      if (word[0] === word[0].toUpperCase()) {
-        return typo.charAt(0).toUpperCase() + typo.slice(1);
-      }
-      return typo;
-    }
+      const match = word.match(/^([^a-zA-Z]*)(.*?)([^a-zA-Z]*)$/);
+      const leading = match ? match[1] : "";
+      const trailing = match ? match[3] : "";
+      const body = match ? match[2] : word;
 
-    // Minor letter swapping for common words randomly with 4% probability
-    if (cleanWord.length > 5 && Math.random() < 0.05) {
-      let chars = word.split("");
-      // Swap two characters
-      const idx = Math.floor(Math.random() * (chars.length - 2)) + 1;
-      if (/[a-zA-Z]/.test(chars[idx]) && /[a-zA-Z]/.test(chars[idx + 1])) {
-        const temp = chars[idx];
-        chars[idx] = chars[idx + 1];
-        chars[idx + 1] = temp;
-        return chars.join("");
+      let res = typo;
+      if (body.charAt(0) === body.charAt(0).toUpperCase()) {
+        res = typo.charAt(0).toUpperCase() + typo.slice(1);
       }
+      return leading + res + trailing;
     }
-
     return word;
-  }).join(" ");
+  });
+
+  // If no typos from dictionary were injected, introduce 1 subtle character swap
+  if (typoCount === 0 && newWords.length > 4) {
+    const candidateIndices: number[] = [];
+    newWords.forEach((w, idx) => {
+      const clean = w.replace(/[^a-zA-Z]/g, "");
+      if (clean.length >= 6 && !clean.toLowerCase().includes("manshav") && !clean.toLowerCase().includes("impex")) {
+        candidateIndices.push(idx);
+      }
+    });
+
+    if (candidateIndices.length > 0) {
+      const targetIdx = candidateIndices[Math.floor(Math.random() * candidateIndices.length)];
+      let wordToModify = newWords[targetIdx];
+      let chars = wordToModify.split("");
+      for (let j = 2; j < chars.length - 2; j++) {
+        if (/[a-zA-Z]/.test(chars[j]) && /[a-zA-Z]/.test(chars[j + 1]) && chars[j] !== chars[j + 1]) {
+          let temp = chars[j];
+          chars[j] = chars[j + 1];
+          chars[j + 1] = temp;
+          newWords[targetIdx] = chars.join("");
+          break;
+        }
+      }
+    }
+  }
+
+  return newWords.join(" ");
 }
 
 const OFFLINE_DB: Record<string, Record<ReviewLanguage, { starters: string[]; middles: string[]; endings: string[] }>> = {

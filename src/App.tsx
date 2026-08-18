@@ -121,28 +121,11 @@ const ManshavLogo = ({ className = "w-48 h-auto", fill = "#4b6334" }: { classNam
 );
 
 const CATEGORIES = [
-  { id: 'Product Quality', label: 'Product Quality', desc: 'Material purity, certified sterile, surgical standards', icon: BadgeCheck },
-  { id: 'Packaging & Export', label: 'Packaging & Export', desc: 'Sealed cleanrooms, double-wall boxes, ocean transit', icon: Package },
-  { id: 'Delivery & Timeliness', label: 'Delivery & Timeliness', desc: 'Air cargo speed, customs clearance, Surat port loading', icon: Truck },
-  { id: 'Communication & Support', label: 'Communication & Support', desc: 'Dedicated export managers, instant updates, pricing sheets', icon: MessageSquare },
-  { id: 'Pricing & Value', label: 'Pricing & Value', desc: 'Direct-from-factory rates, high margins, flexible bulk deals', icon: TrendingUp },
-  { id: 'Compliance & Certs', label: 'Compliance & Certs', desc: 'CE and ISO certificates, FDA-ready, clean logs', icon: ShieldCheck },
-  { id: 'Long-Term Partnership', label: 'Long-Term Partnership', desc: 'Stable year-round inventory, unbroken B2B trust', icon: Handshake },
-  { id: 'Overall Experience', label: 'Overall Experience', desc: 'Flawless 5-star standard, prompt corporate handling', icon: Star },
+  { id: 'Product Quality', label: 'Medical & Surgical Quality', desc: 'Sterile gloves, instruments, apparels', icon: BadgeCheck },
+  { id: 'Packaging & Export', label: 'Export Packaging', desc: 'Moisture-proof container packing', icon: Package },
+  { id: 'Delivery & Timeliness', label: 'Global Delivery', desc: 'Timely freight & customs clearance', icon: Truck },
+  { id: 'Overall Experience', label: 'B2B Service & Trust', desc: 'Direct factory rates, dependable partner', icon: Handshake },
 ];
-
-const LANGUAGES = [
-  { id: 'english', label: 'English Style', desc: 'Standard business English text' },
-  { id: 'gujinglish', label: 'Gujinglish (ગુજરાતી / Mix)', desc: 'Gujarati written using English letters with typos' },
-  { id: 'hinglish', label: 'Hinglish (हिंदी / Mix)', desc: 'Hindi written using English letters for high authenticity' }
-] as const;
-
-const LENGTHS = [
-  { id: 'short', label: 'Short', desc: '20-40 words, simple statement' },
-  { id: 'medium', label: 'Medium', desc: '50-80 words, balanced review' },
-  { id: 'detailed', label: 'Detailed', desc: '90-130 words, product-focused' },
-  { id: 'comprehensive', label: 'Comprehensive / Too Long', desc: '140-200+ words, highly specific trade details' }
-] as const;
 
 type View = 'selector' | 'generating' | 'review' | 'feedback' | 'error' | 'success-feedback';
 
@@ -150,9 +133,11 @@ export default function App() {
   const [view, setView] = useState<View>('selector');
   const [selectedCategory, setSelectedCategory] = useState<string>('Product Quality');
   const [userRating, setUserRating] = useState<number>(5);
-  const [language, setLanguage] = useState<ReviewLanguage>('english');
-  const [length, setLength] = useState<"short" | "medium" | "detailed" | "comprehensive">('medium');
-  const [humanize, setHumanize] = useState<boolean>(false);
+  
+  // Fixed to English, Medium length, and auto-humanize with subtle realistic typos
+  const language: ReviewLanguage = 'english';
+  const length = 'medium';
+  const humanize = true;
   
   const [generatedReview, setGeneratedReview] = useState<string>('');
   const [inputFeedback, setInputFeedback] = useState<string>('');
@@ -266,33 +251,33 @@ export default function App() {
 
 
             {/* FORM INPUTS */}
-            <div className="space-y-4">
+            <div className="space-y-5">
               
               {/* Star Rating Score Select */}
-              <div className="bg-gray-50/60 p-2 rounded-xl border border-gray-100">
-                <div className="flex items-center justify-between gap-3 mb-1 px-1">
+              <div className="bg-gray-50/70 p-3.5 rounded-2xl border border-gray-100/80">
+                <div className="flex items-center justify-between gap-3 mb-2 px-1">
                   <div>
-                    <span className="text-[11px] font-extrabold uppercase text-[#4b6334] tracking-wider block">1. Star Rating Score</span>
-                    <span className="text-[9px] text-gray-400 block">Mapped onto Google reviews.</span>
+                    <span className="text-[11px] font-extrabold uppercase text-[#4b6334] tracking-wider block">1. Rating Experience</span>
+                    <span className="text-[9px] text-gray-400 block">Select your rating score</span>
                   </div>
-                  <span className="text-[10px] font-black text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100 uppercase">
-                    {userRating} Stars
+                  <span className="text-[10px] font-black text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/60 uppercase">
+                    ★ {userRating} Stars
                   </span>
                 </div>
 
-                <div className="flex items-center gap-1 justify-center py-0.5">
+                <div className="flex items-center gap-2 justify-center py-1">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setUserRating(star)}
-                      className="p-0.5 px-2.5 hover:scale-105 transition-transform focus:outline-none flex flex-col items-center group cursor-pointer"
+                      className="p-1 hover:scale-110 active:scale-95 transition-transform focus:outline-none flex flex-col items-center cursor-pointer"
                     >
                       <Star 
-                        className={`w-6 h-6 transition-colors ${
+                        className={`w-7 h-7 transition-colors ${
                           star <= userRating 
                             ? 'fill-[#D3A243] text-[#D3A243] drop-shadow-sm' 
-                            : 'text-gray-300 group-hover:text-amber-300'
+                            : 'text-gray-250 hover:text-amber-300'
                         }`} 
                       />
                     </button>
@@ -302,10 +287,10 @@ export default function App() {
 
               {/* Sourced cargo category segment grid */}
               <div>
-                <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
-                  2. Shipment Cargo Segment
+                <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2.5">
+                  2. Review Focus Area
                 </span>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {CATEGORIES.map((cat) => {
                     const IconComponent = cat.icon;
                     const isSelected = selectedCategory === cat.id;
@@ -314,21 +299,23 @@ export default function App() {
                         key={cat.id}
                         type="button"
                         onClick={() => setSelectedCategory(cat.id)}
-                        className={`p-3 rounded-xl border text-left flex flex-col justify-between transition-all group cursor-pointer h-24 ${
+                        className={`p-3.5 rounded-2xl border text-left flex items-start gap-3 transition-all cursor-pointer ${
                           isSelected 
                             ? 'bg-[#4b6334] text-white border-[#4b6334] shadow-md ring-2 ring-[#D3A243]/30' 
-                            : 'bg-white border-gray-150 hover:bg-gray-50'
+                            : 'bg-white border-gray-150 hover:bg-gray-50/80'
                         }`}
                       >
-                        <div className="flex items-center justify-between w-full">
-                          <IconComponent className={`w-4 h-4 ${isSelected ? 'text-amber-300' : 'text-[#4b6334]'}`} />
-                          {isSelected && <Check className="w-3.5 h-3.5 text-white stroke-[3px]" />}
+                        <div className={`p-2 rounded-xl shrink-0 ${isSelected ? 'bg-white/10 text-amber-300' : 'bg-[#4b6334]/5 text-[#4b6334]'}`}>
+                          <IconComponent className="w-4 h-4" />
                         </div>
-                        <div className="mt-2 text-left">
-                          <span className="text-[10px] font-black uppercase tracking-tight block leading-tight">
-                            {cat.label}
-                          </span>
-                          <span className={`text-[8px] mt-0.5 leading-tight block ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <span className="text-xs font-black uppercase tracking-tight block truncate">
+                              {cat.label}
+                            </span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-amber-300 stroke-[3px] shrink-0" />}
+                          </div>
+                          <span className={`text-[9px] mt-0.5 leading-tight block ${isSelected ? 'text-white/80' : 'text-gray-400'}`}>
                             {cat.desc}
                           </span>
                         </div>
@@ -338,80 +325,16 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Languages & Length configuration blocks side-by-side */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
-                {/* Dialect */}
-                <div>
-                  <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
-                    3. Dialect Language Style
-                  </span>
-                  <div className="space-y-1.5">
-                    {LANGUAGES.map((lang) => {
-                      const isSelected = language === lang.id;
-                      return (
-                        <button
-                          key={lang.id}
-                          type="button"
-                          onClick={() => setLanguage(lang.id)}
-                          className={`w-full p-2 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
-                            isSelected 
-                              ? 'bg-[#4b6334]/5 border-[#4b6334] text-[#4b6334] font-black' 
-                              : 'bg-white border-gray-150 hover:bg-gray-50 text-gray-700'
-                          }`}
-                        >
-                          <div>
-                            <span className="text-[11px] font-extrabold block">{lang.label}</span>
-                            <span className="text-[8px] text-gray-400 block leading-none mt-1">{lang.desc}</span>
-                          </div>
-                          {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-[#4b6334]" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Length */}
-                <div>
-                  <span className="text-xs font-extrabold uppercase text-[#4b6334] tracking-wider block mb-2">
-                    4. Outline Length Limit
-                  </span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {LENGTHS.map((len) => {
-                      const isSelected = length === len.id;
-                      return (
-                        <button
-                          key={len.id}
-                          type="button"
-                          onClick={() => setLength(len.id)}
-                          className={`p-2 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            isSelected 
-                              ? 'bg-[#4b6334]/5 border-[#4b6334] text-[#4b6334] font-bold' 
-                              : 'bg-white border-gray-150 hover:bg-gray-50 text-gray-600'
-                          }`}
-                        >
-                          <span className="text-[11px] font-black leading-tight block">{len.label}</span>
-                          <span className="text-[8px] text-gray-400 font-normal leading-normal mt-1">{len.desc}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-              </div>
-
-
-
             </div>
 
             {/* Compose Draft Button */}
             <button
               type="button"
               onClick={handleGenerate}
-              className="w-full py-3.5 bg-gradient-to-r from-[#4b6334] to-[#394c27] hover:brightness-110 text-white rounded-xl font-black text-xs uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-2"
+              className="w-full py-4 bg-gradient-to-r from-[#4b6334] to-[#364925] hover:brightness-110 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-md transition-all flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer mt-4"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
-              Compose Authentic Review Draft
+              Generate Review Draft
               <ArrowRight className="w-4 h-4" />
             </button>
 
